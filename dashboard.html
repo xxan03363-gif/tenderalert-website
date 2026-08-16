@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TenderAlert — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--teal-950:#0b2b2c;--teal-800:#0f3d3e;--teal-600:#166365;--sage-50:#f1f2ed;--sage-100:#e7e9df;
+    --amber-500:#e8a33d;--green-500:#2d9c6f;--red-500:#b04a3f;--ink:#17211f;--ink-soft:#3d4844;--line:#d7dbd0;--white:#fff;--radius:14px;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--sage-50);color:var(--ink);font-family:'Inter',sans-serif;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:700;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  button{font-family:inherit;}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+  @media(max-width:860px){.app{grid-template-columns:1fr;}}
+  .sidebar{background:var(--teal-950);color:var(--sage-50);padding:22px 16px;display:flex;flex-direction:column;gap:5px;}
+  @media(max-width:860px){.sidebar{display:none;}}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:17px;margin-bottom:26px;}
+  .logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--amber-500),var(--green-500));display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--teal-950);}
+  .navitem{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:9px;font-size:14px;color:rgba(241,242,237,0.72);border:none;background:transparent;text-align:left;cursor:pointer;}
+  .navitem.active{background:rgba(232,163,61,0.14);color:var(--amber-500);font-weight:600;}
+  .sidebar-foot{margin-top:auto;font-size:12px;color:rgba(241,242,237,0.5);padding-top:14px;border-top:1px solid rgba(241,242,237,0.1);}
+  main{padding:26px 30px 50px;}
+  @media(max-width:640px){main{padding:18px 14px 40px;}}
+  .topbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:24px;}
+  .topbar h1{font-size:23px;color:var(--teal-950);}
+  .status-pill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-size:13px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green-500);}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+  @media(max-width:760px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .stat .label{font-size:11px;text-transform:uppercase;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+  .stat .value{font-family:'Space Grotesk',sans-serif;font-size:25px;font-weight:700;color:var(--teal-950);margin-top:4px;}
+  .layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:flex-start;}
+  @media(max-width:980px){.layout{grid-template-columns:1fr;}}
+  .filter-bar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px;}
+  .filter-bar select,.filter-bar input{padding:8px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--sage-50);font-size:13px;}
+  .tender-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;}
+  .tender-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;padding:3px 8px;border-radius:6px;}
+  .tag.sector{background:var(--sage-100);color:var(--teal-800);}
+  .tag.soon{background:rgba(176,74,63,0.12);color:var(--red-500);}
+  .tag.ok{background:rgba(45,156,111,0.12);color:var(--green-500);}
+  .tender-card h3{font-size:15.5px;color:var(--teal-950);margin-bottom:4px;}
+  .tender-meta{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap;}
+  .meta-item .k{font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+  .meta-item .v{font-size:13.5px;font-weight:600;margin-top:2px;}
+  .tender-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap;gap:8px;}
+  .link-btn{background:none;border:none;color:var(--teal-600);font-weight:600;font-size:13px;cursor:pointer;padding:0;}
+  .save-btn{background:var(--sage-100);border:none;border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--teal-800);cursor:pointer;}
+  .save-btn.saved{background:var(--amber-500);color:var(--teal-950);}
+  .checklist{display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+  .checklist.open{display:block;}
+  .checklist h4{font-size:12.5px;color:var(--teal-800);margin-bottom:8px;}
+  .checklist ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;}
+  .checklist li{font-size:12.5px;color:var(--ink-soft);display:flex;gap:7px;align-items:center;}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;}
+  .panel h3{font-size:13.5px;color:var(--teal-950);margin-bottom:12px;}
+  .wa-preview{background:var(--teal-950);border-radius:12px;padding:12px;}
+  .wa-bubble{background:#fff;border-radius:9px;padding:9px 11px;font-size:12px;margin-bottom:7px;}
+  .wa-bubble:last-child{margin-bottom:0;}
+  .wa-bubble b{color:var(--green-500);}
+  .billing-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .billing-row:last-child{border-bottom:none;}
+  .billing-row .k{color:var(--ink-soft);}
+  .note{font-size:11.5px;color:var(--ink-soft);margin-top:9px;}
+  .support-box textarea{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px;font-family:inherit;font-size:13px;background:var(--sage-50);resize:vertical;min-height:70px;}
+  .support-box button{width:100%;margin-top:8px;background:var(--teal-800);color:#fff;border:none;border-radius:9px;padding:10px;font-size:13.5px;font-weight:600;cursor:pointer;}
+  .support-note{font-size:11.5px;color:var(--ink-soft);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><span class="logo-mark">TA</span>TenderAlert</div>
+    <button class="navitem active">Dashboard</button>
+    <button class="navitem">Saved tenders</button>
+    <button class="navitem">Sector settings</button>
+    <button class="navitem">Billing</button>
+    <button class="navitem">Support</button>
+    <div class="sidebar-foot">Kato Building Supplies<br>Wakiso &middot; Construction</div>
+  </aside>
+  <main>
+    <div class="topbar">
+      <div><h1>Good morning, Kato Building Supplies</h1></div>
+      <div class="status-pill"><span class="dot"></span> Founding plan &middot; UGX 30,000/mo</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="label">New this week</div><div class="value">7</div></div>
+      <div class="stat"><div class="label">Matching sector</div><div class="value">4</div></div>
+      <div class="stat"><div class="label">Closing soon</div><div class="value" style="color:var(--red-500);">1</div></div>
+      <div class="stat"><div class="label">Saved</div><div class="value" style="color:var(--green-500);">2</div></div>
+    </div>
+    <div class="layout">
+      <div>
+        <div class="filter-bar">
+          <select id="fSector"><option value="">All sectors</option><option>Construction</option><option>Supplies</option><option>IT</option></select>
+          <select id="fLocation"><option value="">All locations</option><option>Wakiso</option><option>Mbarara</option><option>Kampala</option></select>
+          <input type="text" id="fSearch" placeholder="Search keyword...">
+        </div>
+        <div id="tenderList"></div>
+      </div>
+      <div>
+        <div class="panel">
+          <h3>Next WhatsApp alert preview</h3>
+          <div class="wa-preview">
+            <div class="wa-bubble">New match: <b>Borehole Equipment — Wakiso</b><br>Deadline: 6 days &middot; UGX 42M</div>
+            <div class="wa-bubble">Docs needed: URA, NSSF, URSB</div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Billing</h3>
+          <div class="billing-row"><span class="k">Plan</span><span>Founding &middot; Pro</span></div>
+          <div class="billing-row"><span class="k">Price</span><span>UGX 30,000 / mo</span></div>
+          <div class="billing-row"><span class="k">Next payment</span><span class="mono">12 Sep 2026</span></div>
+          <div class="billing-row"><span class="k">Payment method</span><span>MTN MoMo</span></div>
+          <div class="note">Founding-price subscribers keep this rate permanently.</div>
+        </div>
+        <div class="panel support-box">
+          <h3>Support</h3>
+          <textarea placeholder="Type your message..."></textarea>
+          <button onclick="alert('Demo — connect this to a real inbox/ticketing backend.')">Send message</button>
+          <div class="support-note">We reply here directly — fast, clear, and in writing.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  const tenders = [
+    {id:1, sector:'Construction', location:'Wakiso', title:'Supply & Install Borehole Equipment', value:'UGX 42,000,000', deadline:'6 days', urgent:true,
+      docs:['Tax clearance certificate (URA)','NSSF compliance certificate','URSB business registration']},
+    {id:2, sector:'Supplies', location:'Mbarara', title:'Office Furniture — District HQ', value:'UGX 18,500,000', deadline:'11 days', urgent:false,
+      docs:['Tax clearance certificate (URA)','URSB business registration']},
+    {id:3, sector:'Construction', location:'Kampala', title:'Renovation of Market Stalls — Phase 2', value:'UGX 65,000,000', deadline:'14 days', urgent:false,
+      docs:['Tax clearance certificate (URA)','NSSF compliance certificate','URSB business registration','Bid security (2%)']},
+    {id:4, sector:'IT', location:'Kampala', title:'Supply of Networking Equipment', value:'UGX 27,000,000', deadline:'9 days', urgent:false,
+      docs:['Tax clearance certificate (URA)','URSB business registration','Manufacturer authorization letter']},
+  ];
+  let saved = new Set();
+  function render(){
+    const sector = document.getElementById('fSector').value;
+    const location = document.getElementById('fLocation').value;
+    const search = document.getElementById('fSearch').value.toLowerCase();
+    const list = tenders.filter(t => (!sector||t.sector===sector) && (!location||t.location===location) && (!search||t.title.toLowerCase().includes(search)));
+    const container = document.getElementById('tenderList');
+    container.innerHTML = '';
+    if(list.length===0){ container.innerHTML = '<div class="tender-card">No tenders match these filters.</div>'; return; }
+    list.forEach(t=>{
+      const card = document.createElement('div');
+      card.className = 'tender-card';
+      card.innerHTML = `
+        <div class="tender-tags">
+          <span class="tag sector">${t.sector} &middot; ${t.location}</span>
+          <span class="tag ${t.urgent?'soon':'ok'}">${t.deadline} left</span>
+        </div>
+        <h3>${t.title}</h3>
+        <div class="tender-meta">
+          <div class="meta-item"><div class="k">Value</div><div class="v">${t.value}</div></div>
+          <div class="meta-item"><div class="k">Deadline</div><div class="v">${t.deadline}</div></div>
+        </div>
+        <div class="tender-foot">
+          <button class="link-btn" onclick="toggleChecklist(${t.id})">Compliance checklist &#9662;</button>
+          <button class="save-btn ${saved.has(t.id)?'saved':''}" onclick="toggleSave(${t.id},this)">${saved.has(t.id)?'&#10003; Saved':'Save'}</button>
+        </div>
+        <div class="checklist" id="checklist-${t.id}">
+          <h4>Documents required</h4>
+          <ul>${t.docs.map(d=>`<li><input type="checkbox"> ${d}</li>`).join('')}</ul>
+        </div>`;
+      container.appendChild(card);
+    });
+  }
+  function toggleChecklist(id){ document.getElementById('checklist-'+id).classList.toggle('open'); }
+  function toggleSave(id,btn){
+    if(saved.has(id)){ saved.delete(id); btn.classList.remove('saved'); btn.textContent='Save'; }
+    else{ saved.add(id); btn.classList.add('saved'); btn.innerHTML='&#10003; Saved'; }
+  }
+  document.getElementById('fSector').addEventListener('change', render);
+  document.getElementById('fLocation').addEventListener('change', render);
+  document.getElementById('fSearch').addEventListener('input', render);
+  render();
+</script>
+</body>
+  </html>
+  
